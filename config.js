@@ -17,7 +17,7 @@ module.exports = {
     botName: saved.botName || process.env.BOT_NAME || 'DARK-MIKEY',
     prefix: saved.prefix || process.env.PREFIX || '/',
     sessionName: 'session',
-    sessionID: process.env.SESSION_ID || 'tct_3cc8e6b4',
+    sessionID: process.env.SESSION_ID || '',
     newsletterJid: saved.newsletterJid || process.env.NEWSLETTER_JID || '', // JID de ta chaîne WhatsApp (optionnel)
     updateZipUrl: process.env.UPDATE_ZIP_URL || '', // ZIP de TON dépôt (obligatoire pour .update)
     updateZipSha256: process.env.UPDATE_ZIP_SHA256 || '', // empreinte SHA-256 optionnelle
