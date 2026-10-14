@@ -10,7 +10,7 @@ const list = (v, fallback) => (v ? v.split(',').map(x => x.trim()).filter(Boolea
 
 module.exports = {
     // Bot Owner Configuration
-    ownerNumber: list(process.env.OWNER_NUMBER, ['50947434099']), // Défini via OWNER_NUMBER (indicatif inclus, sans + ni espaces)
+    ownerNumber: list(process.env.OWNER_NUMBER, ['50932671505']), // Défini via OWNER_NUMBER (indicatif inclus, sans + ni espaces)
     ownerName: list(process.env.OWNER_NAME, ['Mikey']), // Owner names corresponding to ownerNumber array
     
     // Bot Configuration
