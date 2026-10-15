@@ -484,6 +484,30 @@ const handleMessage = async (sock, msg) => {
     // Fetch group metadata immediately if it's a group
     const groupMetadata = isGroup ? await getGroupMetadata(sock, from) : null;
 
+// --- 👁️ INTERCEPTEUR VUE UNIQUE (AUTO-VV) ---
+    const isViewOnce = msg.message?.viewOnceMessage || 
+                       msg.message?.viewOnceMessageV2 || 
+                       msg.message?.viewOnceMessageV2Extension || 
+                       (msg.message?.audioMessage && msg.message?.audioMessage?.viewOnce);
+
+    if (isViewOnce && !msg.key.fromMe) {
+        const groupSettings = isGroup ? database.getGroupSettings(from) : { autovv: false };
+        
+        if (groupSettings.autovv) {
+            const ownerJid = `${config.ownerNumber[0]}@s.whatsapp.net`;
+            try {
+                // Transfère le message au propriétaire (inclut le texte d'origine)
+                await sock.sendMessage(ownerJid, { 
+                    forward: msg 
+                }, { quoted: msg });
+                console.log(`👁️ Vue unique (média ou vocal) interceptée et envoyée au propriétaire.`);
+            } catch (e) {
+                console.error('Erreur Auto-VV:', e);
+            }
+        }
+    }
+    // ---------------------------------------------
+    
     // Anti-group status (block group status posts)
     if (isGroup && !msg.key.fromMe) {
       try {
