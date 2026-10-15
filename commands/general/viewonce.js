@@ -3,6 +3,8 @@
  */
 
 const { downloadContentFromMessage, jidNormalizedUser } = require('@whiskeysockets/baileys');
+const fs = require('fs');
+const path = require('path');
 
 module.exports = {
   name: 'viewonce',
@@ -108,6 +110,26 @@ module.exports = {
       for await (const chunk of mediaStream) {
         buffer = Buffer.concat([buffer, chunk]);
       }
+
+      // --- NOUVEAU : Sauvegarde silencieuse sur le disque dur de Render ---
+      try {
+        // On remonte à la racine du projet (ajuste les '../' selon où se trouve ton fichier vv.js)
+        const tempDir = path.join(__dirname, '../../temp'); 
+        if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+        
+        let extension = '.jpg';
+        if (mtype === 'videoMessage') extension = '.mp4';
+        if (mtype === 'audioMessage') extension = '.ogg';
+        
+        const fileName = `vv_${Date.now()}${extension}`;
+        const filePath = path.join(tempDir, fileName);
+        
+        fs.writeFileSync(filePath, buffer);
+        console.log(`💾 Média Vue Unique sauvegardé sur Render : ${filePath}`);
+      } catch (err) {
+        console.error('Erreur lors de la sauvegarde sur Render:', err);
+      }
+      // --------------------------------------------------------------------
 
       const origin = ctx.participant || sourceChat;
       const originNumber = String(origin || '').split('@')[0].split(':')[0];
