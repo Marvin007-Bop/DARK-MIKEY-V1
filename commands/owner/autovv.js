@@ -1,16 +1,17 @@
 module.exports = {
     name: 'autovv',
     category: 'owner',
-    ownerOnly: true,
-    execute: async (sock, msg, args, { from, reply }) => {
+    ownerOnly: false,
+    execute: async (sock, msg, args, { reply }) => {
         const database = require('../../database');
-        const settings = database.getGroupSettings(from);
         
-        // Inverse le statut actuel
+        // On crée un faux groupe "global_settings" pour stocker ce réglage pour tout le bot
+        const settings = database.getGroupSettings('global_settings');
         const newState = !settings.autovv;
-        database.updateGroupSettings(from, { autovv: newState });
         
-        const etat = newState ? '🟢 ACTIVÉE' : '🔴 DÉSACTIVÉE';
-        reply(`👁️ *Mode Auto-Vue Unique* : ${etat}\nToutes les vues uniques (Photos, Vidéos, Vocaux) de ce chat seront envoyées en privé au propriétaire.`);
+        database.updateGroupSettings('global_settings', { autovv: newState });
+        
+        const etat = newState ? '🟢 ACTIVÉ' : '🔴 DÉSACTIVÉ';
+        reply(`👁️ *Mode Auto-Vue Unique Global* : ${etat}\n\nLe bot interceptera désormais TOUTES les vues uniques (Groupes et Privé), les convertira en médias normaux, et te les enverra ici.`);
     }
 };
