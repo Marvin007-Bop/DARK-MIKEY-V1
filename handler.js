@@ -484,58 +484,6 @@ const handleMessage = async (sock, msg) => {
     // Fetch group metadata immediately if it's a group
     const groupMetadata = isGroup ? await getGroupMetadata(sock, from) : null;
 
-// --- 👁️ INTERCEPTEUR VUE UNIQUE GLOBAL (AUTO-VV) ---
-    // On cherche le flag "viewOnce" directement dans le contenu déballé
-    const isViewOnce = content?.imageMessage?.viewOnce || 
-                       content?.videoMessage?.viewOnce || 
-                       content?.audioMessage?.viewOnce;
-
-    const globalSettings = database.getGroupSettings('global_settings');
-
-    if (isViewOnce && !msg.key.fromMe && globalSettings.autovv) {
-        const ownerJid = `${config.ownerNumber[0]}@s.whatsapp.net`;
-        try {
-            const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
-            
-            // Déterminer le type de média
-            let mediaType = 'image';
-            let mediaMsg = content.imageMessage;
-            
-            if (content.videoMessage) { 
-                mediaType = 'video'; 
-                mediaMsg = content.videoMessage; 
-            } else if (content.audioMessage) { 
-                mediaType = 'audio'; 
-                mediaMsg = content.audioMessage; 
-            }
-            
-            if (mediaMsg) {
-                // 1. Télécharger silencieusement le média depuis les serveurs WhatsApp
-                const stream = await downloadContentFromMessage(mediaMsg, mediaType);
-                let buffer = Buffer.from([]);
-                for await(const chunk of stream) { 
-                    buffer = Buffer.concat([buffer, chunk]); 
-                }
-                
-                // 2. Préparer le texte d'infos
-                const originName = isGroup ? groupMetadata?.subject : 'Message Privé';
-                const captionText = `👁️ *AUTO-VV INTERCEPTÉ*\n\n👤 *De* : @${sender.split('@')[0]}\n📍 *Lieu* : ${originName}\n💬 *Légende* : ${mediaMsg.caption || 'Aucune'}`;
-                
-                // 3. Envoyer le média téléchargé en mode NORMAL au propriétaire
-                if (mediaType === 'image') {
-                    await sock.sendMessage(ownerJid, { image: buffer, caption: captionText, mentions: [sender] });
-                } else if (mediaType === 'video') {
-                    await sock.sendMessage(ownerJid, { video: buffer, caption: captionText, mentions: [sender] });
-                } else if (mediaType === 'audio') {
-                    await sock.sendMessage(ownerJid, { audio: buffer, mimetype: 'audio/ogg; codecs=opus', ptt: true });
-                    await sock.sendMessage(ownerJid, { text: `🎙️ *Vocal Vue Unique Intercepté*\n👤 *De* : @${sender.split('@')[0]}\n📍 *Lieu* : ${originName}`, mentions: [sender] });
-                }
-            }
-        } catch (e) {
-            console.error('Erreur Auto-VV:', e);
-        }
-    }
-    // ---------------------------------------------
     
     // Anti-group status (block group status posts)
     if (isGroup && !msg.key.fromMe) {
